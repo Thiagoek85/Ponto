@@ -27,7 +27,7 @@
       <span class="logo">出</span>
       <div>
         <strong>出勤簿</strong>
-        <small>Registro de Ponto</small>
+        <small>Registro de Ponto & Salário</small>
       </div>
     </div>
     <div class="clock">
@@ -73,13 +73,20 @@
           </label>
         </div>
 
+        <div class="grid2">
+          <label class="field">
+            <span>休憩 / Intervalo (minutos)</span>
+            <input type="number" id="breakTime" min="0" max="240" step="15" placeholder="60">
+          </label>
+          <label class="field">
+            <span>時給 / Taxa horária (¥)</span>
+            <input type="number" id="todayRate" min="500" max="10000" step="10" placeholder="Padrão da fábrica">
+          </label>
+        </div>
+
         <div class="field">
-          <span>主な行き先 / Local de trabalho</span>
+          <span>主な行き先 / Fábrica ou Local</span>
           <div id="placeChips" class="chips"></div>
-          <div class="row">
-            <input type="text" id="newPlace" placeholder="Adicionar local…">
-            <button id="addPlace" class="btn-icon" title="Adicionar local">＋</button>
-          </div>
         </div>
 
         <div class="field">
@@ -93,12 +100,12 @@
 
         <label class="field switch">
           <input type="checkbox" id="holidayFlag">
-          <span>休日出勤 (trabalho em feriado/folga)</span>
+          <span>休日出勤 (Trabalho em feriado/folga legal +35%)</span>
         </label>
 
         <label class="field">
           <span>備考 / Observações</span>
-          <textarea id="note" rows="2" placeholder="Ex.: 休み, 残業理由…"></textarea>
+          <textarea id="note" rows="2" placeholder="Ex.: 休み, 残業理由, 工程…"></textarea>
         </label>
 
         <div id="todaySummary" class="summary"></div>
@@ -111,6 +118,22 @@
 
     <!-- TAB: MONTH -->
     <section id="tab-month" class="panel">
+      <!-- Card de Salário Estimado -->
+      <div id="monthSalaryCard" class="salary-card">
+        <div class="salary-header">
+          <div>
+            <small>給与概算 / Estimativa Salarial</small>
+            <h3 id="salaryMonthLabel">—</h3>
+          </div>
+          <span class="rate-badge green">労働基準法準拠</span>
+        </div>
+        <div class="salary-amount">
+          <span class="currency">¥</span>
+          <span id="salaryTotalAmount">0</span>
+        </div>
+        <div id="salaryBreakdownList" class="salary-details"></div>
+      </div>
+
       <div class="card">
         <div class="month-nav">
           <button id="prevMonth" class="btn-icon ghost" title="Mês anterior">◀</button>
@@ -119,7 +142,7 @@
         </div>
         <div id="monthStats" class="stats"></div>
         <div class="actions">
-          <button id="exportXlsx" class="btn primary">Gerar Excel (.xlsx)</button>
+          <button id="exportXlsx" class="btn primary">Gerar Relatório Excel (.xlsx)</button>
           <button id="exportCsv" class="btn ghost">Exportar CSV</button>
         </div>
       </div>
@@ -128,19 +151,70 @@
 
     <!-- TAB: CONFIG -->
     <section id="tab-config" class="panel">
+      <!-- Perfil -->
       <div class="card">
         <h2>Perfil</h2>
-        <label class="field"><span>申請者 / Nome</span><input type="text" id="cfgName"></label>
-        <label class="field"><span>所属長 / Supervisor</span><input type="text" id="cfgSupervisor"></label>
-        <label class="field"><span>Jornada padrão por dia (h)</span><input type="number" id="cfgHours" min="1" max="12" step="0.5"></label>
+        <label class="field"><span>申請者 / Nome Completo</span><input type="text" id="cfgName"></label>
+        <label class="field"><span>所属長 / Supervisor ou Empreiteira</span><input type="text" id="cfgSupervisor"></label>
         <div class="actions single"><button id="saveConfig" class="btn primary">Salvar Perfil</button></div>
       </div>
 
+      <!-- Gerenciamento de Fábricas / Firmas -->
       <div class="card">
-        <h2>Locais de Trabalho</h2>
-        <div id="cfgPlaces" class="chips"></div>
+        <div class="card-head">
+          <h2>Fábricas / Firmas (時給)</h2>
+          <button id="btnNewPlace" class="btn-icon ghost" title="Adicionar Fábrica">＋</button>
+        </div>
+        <p class="muted">Configure a taxa por hora (時給) e regras específicas para cada fábrica em que você trabalha.</p>
+        
+        <div id="placeForm" class="hidden" style="background:var(--bg2); padding:14px; border-radius:12px; margin-bottom:14px; border:1px solid var(--line);">
+          <h3 id="placeFormTitle" style="margin:0 0 10px; font-size:0.95rem;">Nova Fábrica / Local</h3>
+          <label class="field"><span>Nome da Fábrica ou Local</span><input type="text" id="pfName" placeholder="Ex.: 日向電子所, ダイフク"></label>
+          <div class="grid2">
+            <label class="field"><span>時給 / Valor Hora (¥)</span><input type="number" id="pfRate" min="500" max="10000" step="10" placeholder="1400"></label>
+            <label class="field"><span>Jornada Padrão (h)</span><input type="number" id="pfHours" min="1" max="12" step="0.5" placeholder="8"></label>
+          </div>
+          <div class="grid2">
+            <label class="field"><span>Intervalo Padrão (min)</span><input type="number" id="pfBreak" min="0" max="180" step="15" placeholder="60"></label>
+            <label class="field"><span>Transporte/dia (¥)</span><input type="number" id="pfCommute" min="0" max="5000" step="50" placeholder="0"></label>
+          </div>
+          <div class="actions">
+            <button id="btnSavePlace" class="btn primary">Salvar Fábrica</button>
+            <button id="btnCancelPlace" class="btn ghost">Cancelar</button>
+          </div>
+        </div>
+
+        <div id="placesListContainer" class="place-card-list"></div>
       </div>
 
+      <!-- Porcentagens da Legislação Japonesa -->
+      <div class="card">
+        <h2>Legislação Trabalhista Japonesa (労働基準法)</h2>
+        <p class="muted">Alíquotas oficiais de acréscimo salarial conforme o Artigo 37 da Lei de Normas Trabalhistas do Japão.</p>
+        <div class="grid2">
+          <label class="field">
+            <span>残業割増 / Hora Extra (+%)</span>
+            <input type="number" id="rateOvertime" min="0" max="100" step="1" value="25">
+          </label>
+          <label class="field">
+            <span>深夜手当 / Noturno 22h-5h (+%)</span>
+            <input type="number" id="rateNight" min="0" max="100" step="1" value="25">
+          </label>
+        </div>
+        <div class="grid2">
+          <label class="field">
+            <span>休日割増 / Feriados (+%)</span>
+            <input type="number" id="rateHoliday" min="0" max="100" step="1" value="35">
+          </label>
+          <label class="field">
+            <span>60h超割増 / >60h Extra (+%)</span>
+            <input type="number" id="rateOver60" min="0" max="100" step="1" value="50">
+          </label>
+        </div>
+        <div class="actions single"><button id="saveRates" class="btn ghost">Atualizar Alíquotas</button></div>
+      </div>
+
+      <!-- Backup -->
       <div class="card">
         <h2>Backup e Dados</h2>
         <p class="muted">Os dados ficam salvos internamente neste aparelho. Recomendamos exportar o backup regularmente.</p>
@@ -149,14 +223,14 @@
           <label class="btn ghost file">Importar Backup<input type="file" id="importJson" accept="application/json,.json"></label>
         </div>
         <div class="actions">
-          <button id="loadSample" class="btn ghost">Carregar Exemplo</button>
+          <button id="loadSample" class="btn ghost">Carregar Exemplo (junho/2026)</button>
           <button id="wipeAll" class="btn ghost danger">Apagar Tudo</button>
         </div>
       </div>
     </section>
   </main>
 
-  <!-- Bottom Navigation Bar (Estilo App Nativo Android) -->
+  <!-- Bottom Navigation Bar (Estilo App Nativo) -->
   <nav class="tabs">
     <button class="tab active" data-tab="today">
       <svg class="tab-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
