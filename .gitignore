@@ -1,0 +1,17 @@
+# Segredos e credenciais — NUNCA commitar
+.env
+.env.*
+*.key
+*.pem
+*secret*
+*credential*
+
+# Backups locais de correção
+*.bak.*
+.bak_correcoes/
+*.log
+
+# Builds e artefatos
+node_modules/
+# ponto.apk (mantido versionado por decisao do dono)
+.DS_Store
